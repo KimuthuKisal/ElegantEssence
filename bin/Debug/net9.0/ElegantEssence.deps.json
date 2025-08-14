@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "ElegantEssence/1.0.0": {
+        "runtime": {
+          "ElegantEssence.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ElegantEssence/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
