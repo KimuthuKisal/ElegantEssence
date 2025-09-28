@@ -2,7 +2,7 @@
 
 namespace ElegantEssence.ViewModels
 {
-    public class VerfyEmailViewModel
+    public class VerifyEmailViewModel
     {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]
