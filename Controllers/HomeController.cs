@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ElegantEssence.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElegantEssence.Controllers;
 
@@ -18,7 +19,20 @@ public class HomeController : Controller
         return View();
     }
 
+    [Authorize]
     public IActionResult Privacy()
+    {
+        return View();
+    }
+
+    [Authorize(Roles = "Admin")]
+    public IActionResult Admin()
+    {
+        return View();
+    }
+
+    [Authorize(Roles = "User")]
+    public IActionResult User()
     {
         return View();
     }
