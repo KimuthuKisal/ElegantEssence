@@ -1,4 +1,5 @@
 ﻿using ElegantEssence.Models;
+using ElegantEssence.Services;
 using ElegantEssence.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,14 @@ namespace ElegantEssence.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IEmailService _emailService;
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this._emailService = emailService;
         }
 
         [HttpGet]
@@ -106,27 +109,56 @@ namespace ElegantEssence.Controllers
                 return View(verifyEmailModel);
             }
 
-            var user = await userManager.FindByNameAsync(verifyEmailModel.Email);
+            var user = await userManager.FindByEmailAsync(verifyEmailModel.Email);
+
+            //var user = await userManager.FindByNameAsync(verifyEmailModel.Email);
 
             if (user == null)
             {
                 return View(verifyEmailModel);
             }
-            else
-            {
-                return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
-            }
+            //else
+            //{
+            //    return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
+            //}
+
+            var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = Url.Action("ChangePassword", "Account", new { email = verifyEmailModel.Email, token = resetToken}, Request.Scheme);
+
+            var subject = "Password Reset";
+            var body = $"Click here to reset your password. <a href = '{resetLink}'>Reset Password</a>";
+
+            await _emailService.SendEmailAsync(verifyEmailModel.Email, subject, body);
+
+            return RedirectToAction("EmailSent", "Account");
         }
 
+        //[HttpGet]
+        //public IActionResult ChangePassword(string username)
+        //{
+        //    if (string.IsNullOrEmpty(username))
+        //    {
+        //        return RedirectToAction("VerifyEmail", "Account");
+        //    }
+
+        //    return View(new ChangePasswordViewModel { Email = username });
+        //}
+
         [HttpGet]
-        public IActionResult ChangePassword(string username)
+        public IActionResult ChangePassword(string email, string token)
         {
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("VerifyEmail", "Account");
             }
 
-            return View(new ChangePasswordViewModel { Email = username });
+            var model = new ChangePasswordViewModel
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -138,24 +170,33 @@ namespace ElegantEssence.Controllers
                 return View(newPasswordmodel);
             }
 
-            var user = await userManager.FindByNameAsync(newPasswordmodel.Email);
+            //var user = await userManager.FindByNameAsync(newPasswordmodel.Email);
+            var user = await userManager.FindByEmailAsync(newPasswordmodel.Email);
 
             if (user == null)
             {
                 return View(newPasswordmodel);
             }
 
-            var result = await userManager.RemovePasswordAsync(user);
+            //var result = await userManager.RemovePasswordAsync(user);
+            var result = await userManager.ResetPasswordAsync(user, newPasswordmodel.Token, newPasswordmodel.NewPassword);
 
             if (result.Succeeded) 
             {
-                return RedirectToAction("Login", "Account", new { username = user.UserName });
+                //return RedirectToAction("Login", "Account", new { username = user.UserName });
+                return RedirectToAction("Login", "Account");
             }
             else
             {
                 return View(newPasswordmodel);
             }
 
+        }
+
+        [HttpGet]
+        public IActionResult EmailSent()
+        {
+            return View();
         }
 
         [HttpPost]

@@ -24,6 +24,9 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     }
 ).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 var app = builder.Build();
 
 await SeedService.SeedDatabase(app.Services);

@@ -28,13 +28,13 @@ public class HomeController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Admin()
     {
-        return View();
+        return View("AdminPage");
     }
 
     [Authorize(Roles = "User")]
     public IActionResult User()
     {
-        return View();
+        return View("UserPage");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

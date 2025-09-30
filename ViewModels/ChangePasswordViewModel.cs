@@ -8,11 +8,14 @@ namespace ElegantEssence.ViewModels
         [EmailAddress]
         public string Email { get; set; }
 
+        [Required]
+        public string Token { get; set; }
+
         [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)]
         [StringLength(32, MinimumLength = 8, ErrorMessage = "The password must have minimun 8 characters and maximum 32 characters.")]
         [Display(Name = "New Password")]
-        [Compare("ConfirmPassword", ErrorMessage = "Password does not match")]
+        [Compare("NewConfirmPassword", ErrorMessage = "Password does not match")]
         public string NewPassword { get; set; }
 
         [Required(ErrorMessage = "Confirm Password is required.")]
